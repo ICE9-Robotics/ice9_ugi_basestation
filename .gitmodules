@@ -1,0 +1,4 @@
+[submodule "basestation_ws/src/mapviz"]
+	path = basestation_ws/src/mapviz
+	url = https://github.com/ICE9-Robotics/mapviz.git
+	branch = ice9-master

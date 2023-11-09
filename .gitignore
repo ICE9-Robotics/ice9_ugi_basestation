@@ -1,0 +1,14 @@
+# mac_os
+.DS_Store
+
+# visual studio code
+.vscode
+
+# ros
+basestation_ws/src/CMakeLists.txt
+build
+devel
+
+# generated
+.log
+.log.backup
