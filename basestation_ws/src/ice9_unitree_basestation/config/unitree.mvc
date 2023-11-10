@@ -10,9 +10,9 @@ show_status_bar: true
 show_capture_tools: true
 window_width: 1299
 window_height: 713
-view_scale: 0.1149174
-offset_x: -6.540698
-offset_y: 3.011308
+view_scale: 0.1252101
+offset_x: -10.88933
+offset_y: 6.203946
 background: "#a0a0a4"
 image_transport: compressed
 displays:
@@ -189,11 +189,12 @@ displays:
       visible: false
       collapsed: true
       frame: base_footprint
-      image: UTGO1PRO.jpg
+      image: UTGO1PRO.png
       width: 2
       height: 1
       offset_x: 0
       offset_y: 0
+      ratio: original
   - listName: action
     type: mapviz_plugins/move_base
     name: Robot goal control

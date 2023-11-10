@@ -5,9 +5,10 @@
 .vscode
 
 # ros
+build/
+devel/
 basestation_ws/src/CMakeLists.txt
-build
-devel
+.catkin_workspace
 
 # generated
 .log
