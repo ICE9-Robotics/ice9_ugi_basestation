@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find ice9_unitree_basestation)/launch/include/mapviz.launch" />
+    <include file="$(find ice9_unitree_basestation)/launch/include/teleop_joy.launch" />
+</launch>

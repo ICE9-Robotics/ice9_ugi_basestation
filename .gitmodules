@@ -2,3 +2,11 @@
 	path = basestation_ws/src/mapviz
 	url = https://github.com/ICE9-Robotics/mapviz.git
 	branch = ice9-master
+[submodule "basestation_ws/src/nmea_msgs"]
+	path = basestation_ws/src/nmea_msgs
+	url = https://github.com/tmxkn1/nmea_msgs.git
+	branch = master
+[submodule "basestation_ws/src/unitree_ros_to_real"]
+	path = basestation_ws/src/unitree_ros_to_real
+	url = https://github.com/ICE9-Robotics/unitree_ros_to_real.git
+	branch = unitree_go1

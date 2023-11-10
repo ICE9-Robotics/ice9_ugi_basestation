@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+    <name>ice9_unitree_basestation</name>
+    <version>1.0.0</version>
+    <description>
+        ICE9 base station PC ROS package for Unitree GO 1.
+    </description>
+    <url>https://github.com/ICE9-Robotics/ice9_unitree_basestation</url>
+
+    <author email="anthony.jiang.github@outlook.com">Zhengyi Jiang</author>
+    <maintainer email="anthony.jiang.github@outlook.com">Zhengyi Jiang</maintainer>
+    <license>BSD</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <run_depend>mapviz</run_depend>
+    <run_depend>posecov_to_pose</run_depend>
+
+    <export>
+    </export>
+</package>

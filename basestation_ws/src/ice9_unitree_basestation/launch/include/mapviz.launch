@@ -1,0 +1,18 @@
+<launch>
+    <node pkg="swri_transform_util" type="initialize_origin.py" name="initialize_origin">
+        <param name="local_xy_origin" value="auto" />
+        <param name="local_xy_frame" value="origin" />
+        <remap from="fix" to="reach/fix" />
+        <rosparam param="local_xy_origins">
+            [{ name: backyard,
+                latitude: 53.5002167467,
+                longitude: -2.275765225,
+                altitude: 35.6640014648,
+                heading: 42}]
+        </rosparam>
+    </node>
+        
+    <node pkg="mapviz" type="mapviz" name="mapviz">
+        <param name="config" value="$(find ice9_unitree_basestation)/config/unitree.mvc" />
+    </node>
+</launch>
