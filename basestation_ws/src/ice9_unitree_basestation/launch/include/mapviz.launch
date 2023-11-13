@@ -4,11 +4,11 @@
         <param name="local_xy_frame" value="origin" />
         <remap from="fix" to="reach/fix" />
         <rosparam param="local_xy_origins">
-            [{ name: backyard,
-                latitude: 53.5002167467,
-                longitude: -2.275765225,
-                altitude: 35.6640014648,
-                heading: 42}]
+            [{ name: fixed_origin,
+                latitude: 0,
+                longitude: 0,
+                altitude: 0,
+                heading: 0}]
         </rosparam>
     </node>
         
