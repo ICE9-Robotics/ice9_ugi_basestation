@@ -46,7 +46,7 @@ if [ ${ros_enable} ]; then
 		source ~/.bashrc
 		sudo apt-get install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential -y
 		sudo apt-get install python-rosdep -y
-		sudo rosdep init
+		sudo rosdep init --include-eol-distros
 		rosdep update
 	fi
 fi
