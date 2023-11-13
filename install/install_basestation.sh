@@ -13,8 +13,7 @@ rm -rf unitree_legged_real
 cd ../..
 rosdep install --from-paths src --ignore-src -r -y
 catkin_make
-echo "source ${dir}/basestation_ws/devel/setup.bash" >> ~/.bashrc
-source ~/.bashrc
+echo "source ${dir}/basestation_ws/devel/setup.bash" >> ${HOME}/.bashrc
 
 # Configure mapviz
 cp ${dir}/basestation_ws/src/ice9_unitree_basestation/config/unitree.mvc ${dir}/basestation_ws/src/ice9_unitree_basestation/config/unitree.local.mvc
@@ -31,3 +30,6 @@ Type=Application" > Unitree_Basestation.desktop
 chmod +x Unitree_Basestation.desktop
 gio set Unitree_Basestation.desktop "metadata::trusted" true
 mv Unitree_Basestation.desktop ~/Desktop/Unitree_Basestation.desktop
+
+mkdir -p ${HOME}/.config/ice9_basestation
+echo "export BASESTATION_DIR=${dir}" > ${HOME}/.config/ice9_basestation/setup.bash
