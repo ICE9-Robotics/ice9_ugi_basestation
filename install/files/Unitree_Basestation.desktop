@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Unitree Basestation
+Comment=Launch the base station for Unitree Go1
+Exec=/home/ice9/ice9_ugi_basestation/install/files/basestation.desktop.sh
+Icon=/home/ice9/ice9_ugi_basestation/install/files/ice9_logo.png
+Terminal=true
+Type=Application
