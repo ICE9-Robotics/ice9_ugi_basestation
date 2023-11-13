@@ -14,7 +14,9 @@
     <buildtool_depend>catkin</buildtool_depend>
 
     <run_depend>mapviz</run_depend>
-    <run_depend>posecov_to_pose</run_depend>
+    <run_depend>teleop_twist_joy</run_depend>
+    <run_depend>unitree_legged_msgs</run_depend>
+    <run_depend>nmea_msgs</run_depend>
 
     <export>
     </export>
