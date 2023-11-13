@@ -13,6 +13,6 @@
     </node>
         
     <node pkg="mapviz" type="mapviz" name="mapviz">
-        <param name="config" value="$(find ice9_unitree_basestation)/config/unitree.mvc" />
+        <param name="config" value="$(find ice9_unitree_basestation)/config/unitree.local.mvc" />
     </node>
 </launch>
