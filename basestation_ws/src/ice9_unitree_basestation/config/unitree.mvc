@@ -27,7 +27,7 @@ displays:
           max_zoom: 19
           name: Google_Satellite
           type: wmts
-      bing_api_key: Au3KYijoO2hAkk7ylVnnk9GaPahx2ueDE_qW_zVfC2NHiaNGR5CkO7ftX_KRykU4
+      bing_api_key: ""
       source: Bing Maps (terrain)
   - listName: config
     type: mapviz_plugins/occupancy_grid
