@@ -8,13 +8,12 @@ show_displays: false
 show_actions: true
 show_status_bar: true
 show_capture_tools: true
-window_width: 1299
-window_height: 713
-view_scale: 0.1252101
-offset_x: -10.88933
-offset_y: 6.203946
+window_width: 1853
+window_height: 1025
+view_scale: 1
+offset_x: 0
+offset_y: 0
 background: "#a0a0a4"
-image_transport: compressed
 displays:
   - listName: config
     type: mapviz_plugins/tile_map
@@ -67,7 +66,7 @@ displays:
     type: mapviz_plugins/occupancy_grid
     name: Global costmap
     config:
-      visible: true
+      visible: false
       collapsed: true
       alpha: 0.5
       topic: /slam_planner_node/global_costmap/costmap
@@ -186,12 +185,12 @@ displays:
     type: mapviz_plugins/robot_image
     name: Robot Icon
     config:
-      visible: false
+      visible: true
       collapsed: true
       frame: base_footprint
       image: UTGO1PRO.png
-      width: 2
-      height: 1
+      width: 0.5
+      height: 0.23
       offset_x: 0
       offset_y: 0
       ratio: original
@@ -202,11 +201,11 @@ displays:
       visible: true
       collapsed: false
   - listName: action
-    type: mapviz_plugins/draw_polygon
-    name: Draw waypoints
+    type: mapviz_plugins/draw_waypoints
+    name: new display
     config:
       visible: true
       collapsed: false
-      frame: ""
-      polygon_topic: ""
-      color: "#00ff00"
+      frame: map
+      polygon_topic: /polygon
+      color: "#5c3566"
