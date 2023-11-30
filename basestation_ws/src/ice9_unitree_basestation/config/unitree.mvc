@@ -201,8 +201,14 @@ displays:
       visible: true
       collapsed: false
   - listName: action
+    type: mapviz_plugins/matcher
+    name: GPS pose matcher
+    config:
+      visible: true
+      collapsed: false
+  - listName: action
     type: mapviz_plugins/draw_waypoints
-    name: new display
+    name: Patrol waypoints
     config:
       visible: true
       collapsed: false
