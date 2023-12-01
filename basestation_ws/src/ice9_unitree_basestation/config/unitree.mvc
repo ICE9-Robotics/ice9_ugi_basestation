@@ -194,6 +194,19 @@ displays:
       offset_x: 0
       offset_y: 0
       ratio: original
+  - listName: config
+    type: mapviz_plugins/ugi_diagnostics
+    name: Diagnostics info
+    config:
+      visible: true
+      collapsed: true
+      font: Monospace,9,-1,5,50,0,0,0,0,0
+      color: "#2e3436"
+      topic: /unitree/diagnostics
+      anchor: top left
+      units: pixels
+      offset_x: 3
+      offset_y: 2
   - listName: action
     type: mapviz_plugins/move_base
     name: Robot goal control
