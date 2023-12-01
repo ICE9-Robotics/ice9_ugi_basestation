@@ -18,3 +18,6 @@
 	path = basestation_ws/src/teleop_twist_joy
 	url = https://github.com/ros-teleop/teleop_twist_joy
 	branch = indigo-devel
+[submodule "basestation_ws/src/unitree_ugi_diagnostics"]
+	path = basestation_ws/src/unitree_ugi_diagnostics
+	url = https://github.com/ICE9-Robotics/unitree_ugi_diagnostics.git
