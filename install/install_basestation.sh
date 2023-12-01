@@ -8,6 +8,9 @@ cd basestation_ws/src/unitree_ros_to_real
 git fetch --tag
 git checkout tags/v3.8.0
 rm -rf unitree_legged_real
+cd ../unitree_ugi_diagnostics/
+rm -rf unitree_diagnostics
+
 
 # Build ros packages
 cd ../..
