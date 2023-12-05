@@ -208,23 +208,9 @@ displays:
       offset_x: 3
       offset_y: 2
   - listName: action
-    type: mapviz_plugins/move_base
-    name: Robot goal control
+    type: mapviz_plugins/ugi_basestation
+    name: Control Panel
     config:
       visible: true
       collapsed: false
-  - listName: action
-    type: mapviz_plugins/matcher
-    name: GPS pose matcher
-    config:
-      visible: true
-      collapsed: false
-  - listName: action
-    type: mapviz_plugins/draw_waypoints
-    name: Patrol waypoints
-    config:
-      visible: true
-      collapsed: false
-      frame: map
-      polygon_topic: /polygon
-      color: "#5c3566"
+      color: "#00ff00"
