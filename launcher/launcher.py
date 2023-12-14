@@ -1,22 +1,19 @@
-# TODO network delay test
-# TODO speed test for ros
 # TODO add dependency
-# TODO detect ros master so ros service call won't be blocking.
 # TODO set hourglass cursor when ros service call is blocking.
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QCursor
 import sys
 import os
 import subprocess
 import psutil
 import threading
 from time import sleep
-import yaml
+import ruamel.yaml as yaml
 from speedtest import Speedtest, ConfigRetrievalError
 import rospy
 import rosservice
-from std_srvs.srv import Trigger
 
 import launcher_ui
 
@@ -39,7 +36,6 @@ def getPid(pname):
                     return process.pid
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
-
         return None
     except Exception as e:
         print("An error occurred: {}".format(e))
@@ -51,6 +47,7 @@ def getMapvizConfig():
         return None
     with open(config_path, 'r') as stream:
         try:
+            yaml.preserve_quotes = True
             return yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
@@ -63,7 +60,7 @@ def saveMapvizConfig(config):
     try:
         with open(config_path, 'w') as stream:
             try:
-                yaml.dump(config, stream)
+                yaml.safe_dump(config, stream, default_flow_style=False, allow_unicode=True)
             except yaml.YAMLError as exc:
                 print(exc)
     except Exception as e:
@@ -118,14 +115,22 @@ class RosHandler():
             services = rosservice.get_service_list()
             for s in services:
                 if service in s:
-                    return s
+                    return s.split('/')[1]
         except rospy.service.ServiceException as e:
             return None
     
     def callService(self, service, req):
         if not self.isRosOk:
             return None
-        return rospy.ServiceProxy(service, req).call()
+        try:
+            p = subprocess.Popen(['rosservice', 'call', service, req], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            res, err = p.communicate()
+            if p.returncode != 0:
+                return False, err
+            else:
+                return True, res
+        except Exception as e:
+            return False, e
     
     def rosOkThreadCallback(self):
         while not self.rosOkThreadStopEvent.is_set():
@@ -171,47 +176,6 @@ class SpeedtestThread(QtCore.QThread):
         finally:
             self.is_alive = False
 
-class RemoteSpeedtestReprotThread(QtCore.QThread):
-    report_ready = QtCore.pyqtSignal(object)
-
-    def __init__(self, rosHandler, parent=None):
-        QtCore.QThread.__init__(self, parent)
-        self.rosHandler = rosHandler
-        self.is_alive = False
-        self.cancel_requested = False
-        self.previous_state = -2
-
-    def run(self):
-        self.is_alive = True
-        while not self.cancel_requested:
-            try:
-                res = self.rosHandler.callService('/internet_speed_node/get_report', Trigger)
-                print(res)
-            except rospy.service.ServiceException as e:
-                report = { 'status': -3, 'status_description': "Failed to get speed test report, ROS: \n%s" % e}
-                self.report_ready.emit(report)
-                break
-            if not res:
-                report = { 'status': -3, 'status_description': "Failed to get speed test report, ROS comm error"}
-                self.report_ready.emit(report)
-                break
-            if res.success == True:
-                report = yaml.safe_load(res.message)
-                if report['status'] == self.previous_state:
-                    continue
-                self.previous_state = report['status']
-                self.report_ready.emit(report)
-                if report['status'] == 3 or report['status'] < 0:
-                    break
-            sleep(1)
-        self.is_alive = False
-        self.cancel_requested = False
-        self.previous_state = -2
-        print("Remote speed test thread terminated")
-    
-    def cancel(self):
-        self.cancel_requested = True
-
 class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
     def __init__(self, parent=None):
         # QT init
@@ -244,7 +208,6 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
 
     def connectUIControls(self):
         self.pushButtonNetSpdBase.clicked.connect(self.netSpdBaseClickedCallback)
-        self.pushButtonNetSpdUnitree.clicked.connect(self.netSpdUnitreeClickedCallback)
 
         self.pushButtonMapvizLaunch.clicked.connect(self.mapvizLaunchClickedCallback)
         self.pushButtonMapvizSafeQuit.clicked.connect(self.mapvizSafeQuitClickedCallback)
@@ -304,7 +267,12 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
             displayErrorBox("Error getting Mapviz config. Config file may be corrupted. Settings incomplete.")
        
     def toggleMapvizDisplayVisibility(self, type, name, on):
-        suc, msg = self.toggleMapvizDisplayVisibility_(type, name, on)
+        QtWidgets.QApplication.setOverrideCursor(
+            QCursor(QtCore.Qt.WaitCursor))
+        try:
+            suc, msg = self.toggleMapvizDisplayVisibility_(type, name, on)
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
         self.mapvizServiceAttempt = 0
         if not suc:
             self.setStatusBarError(msg)
@@ -314,26 +282,23 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
 
     def toggleMapvizDisplayVisibility_(self, type, name, on):
         if not self.mapvizServiceName:
-            self.mapvizServicename = self.rosHandler.findServiceName('mapviz')
+            self.mapvizServiceName = self.rosHandler.findServiceName('mapviz')
             if not self.mapvizServiceName:
                 return False, "Error getting Mapviz service name"
-            
+
         req = "name: '{name}'\ntype: '{type}'\nvisible: {on}".format(name=name, type=type, on=on)
-        try:
-            res = self.rosHandler.callService(self.mapvizServiceName + "/remove_mapviz_display", req)
-        except rospy.service.ServiceException as e:
+        res = self.rosHandler.callService(self.mapvizServiceName + "/add_mapviz_display", req)
+        if not res:
+            return False, "Error communicating with ROS"
+        if res[0] == True:
+            return True, ""
+        else:
             # Maybe mapviz service name has changed, retry once.
             if self.mapvizServiceAttempt < 1:
                 self.mapvizServiceAttempt += 1
                 self.mapvizServiceName = ""
                 return self.toggleMapvizDisplayVisibility_(type, name, on)
-            return False, "Error communicating with ROS: %s" % e
-        if not res:
-            return False, "Error communicating with ROS"
-        if res.success == True:
-            return True, ""
-        else:
-            return False, "Error returned from Mapviz service: %s" % res.message
+            return False, "Failed: %s" % res[1]
  
     def rosOkEventHandler(self, event):
         if event == "master_ping":
@@ -345,11 +310,11 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
             if self.rosHandler.isRosOk:
                 self.labelMasterState.setText("OK")
                 self.labelMasterState.setStyleSheet("color: green")
-                self.pushButtonNetSpdUnitree.setEnabled(True)
+                self.pushButtonMapvizLaunch.setEnabled(True)
             else:
                 self.labelMasterState.setText("Unavailable")
-                self.labelMasterState.setStyleSheet("color: red")  
-                self.pushButtonNetSpdUnitree.setEnabled(False)    
+                self.labelMasterState.setStyleSheet("color: red") 
+                self.pushButtonMapvizLaunch.setEnabled(False)  
 
     ################
     ## Status bar ##
@@ -411,58 +376,6 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
             self.labelNetSpdBaseTime.setText("Error!")
             displayErrorBox("An unexpected error occured while testing network speed: \n%s" % (report[1]))
 
-    def netSpdUnitreeClickedCallback(self):
-        if not self.remoteSpeedtestReportThread:
-            self.remoteSpeedtestReportThread = RemoteSpeedtestReprotThread(self.rosHandler)
-            self.remoteSpeedtestReportThread.report_ready.connect(self.remoteReportReadyCallback)
-        if self.remoteSpeedtestReportThread.is_alive:
-            self.setStatusBarWarning("Speed test is already running")
-            return
-        
-        self.labelNetSpdUnitreeLatency.setText("")
-        self.labelNetSpdUnitreeDown.setText("")
-        self.labelNetSpdUnitreeUp.setText("")
-        self.labelNetSpdUnitreeTime.setText("Sending request...")
-
-        res = None
-        try:
-            res = self.rosHandler.callService('/internet_speed_node/run_speed_test', Trigger)
-        except rospy.service.ServiceException as e:
-            displayErrorBox("An error occured while communicating with ROS: \n%s" % e)
-        if not res:
-            self.labelNetSpdUnitreeTime.setText("Error!")
-            displayErrorBox("Not connected to ROS")
-            return
-        if res.success == False:
-            self.labelNetSpdUnitreeTime.setText("Error!")
-            displayErrorBox("Communication was OK but remote failed to start speed test: \n%s" % res.message)
-            return
-
-        self.labelNetSpdUnitreeTime.setText("Getting test server...")
-        self.remoteSpeedtestReportThread.run()
-        self.setStatusBarInfo("Speed test request was successful")
-
-    def remoteReportReadyCallback(self, report):
-        if report['status'] == 1:
-            self.labelNetSpdUnitreeLatency.setText("{:.0f} ms".format(report['ping']))
-            self.labelNetSpdUnitreeTime.setText("Testing download speed...")
-        elif report['status'] == 2:
-            self.labelNetSpdUnitreeDown.setText("{:.3f} Mbps".format(report['download_speed']/1000000))
-            self.labelNetSpdUnitreeTime.setText("Testing upload speed...")
-        elif report['status'] == 3:
-            self.labelNetSpdUnitreeUp.setText("{:.3f} Mbps".format(report['upload_speed']/1000000))
-            self.labelNetSpdUnitreeTime.setText("%s %s" % (report['timestamp'].split('T')[0], (report['timestamp'].split('T')[1]).split('.')[0]))
-            self.setStatusBarInfo("Remote speed test successful")
-        elif report['status'] == -1:
-            self.labelNetSpdUnitreeTime.setText("Error!")
-            displayErrorBox("No connection to the test server or temporarily blocked because it was run too often: \n%s" % (report['status_description']))
-        elif report['status'] == -2:
-            self.labelNetSpdUnitreeTime.setText("Error!")
-            displayErrorBox("An unexpected error occured while testing network speed: \n%s" % (report['status_description']))
-        elif report['status'] == -3:
-            self.labelNetSpdUnitreeTime.setText("Error!")
-            displayErrorBox("%s" % (report['status_description']))
-
     def mapvizLaunchClickedCallback(self):
         if not getPid('basestation.desktop.sh'):
             base_path = getBasePath()
@@ -471,18 +384,18 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
             self.setStatusBarInfo("Mapviz already running")
 
     def mapvizSafeQuitClickedCallback(self):
-        pid = getPid('basestation.desktop.sh')
+        pid = getPid('basestation.des')
         if pid:
             psutil.Process(pid).terminate()
-            self.setStatusBarInfo("Safe quit was successful")
+            self.setStatusBarInfo("Safe quit requested")
         else:
             self.setStatusBarWarning("Mapviz not running")
 
     def mapvizForceQuitClickedCallback(self):
-        pid = getPid('basestation.desktop.sh')
+        pid = getPid('basestation.des')
         if pid:
             psutil.Process(pid).kill()
-            self.setStatusBarInfo("Force quit was successful")
+            self.setStatusBarInfo("Force quit requested")
         else:
             self.setStatusBarWarning("Mapviz not running")
 
@@ -505,14 +418,14 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
             self.checkBoxShowSlamMap.blockSignals(False)
 
     def showUnitreeImgToggledCallback(self):
-        if not self.toggleMapvizDisplayVisibility('mapviz_plugins/image', 'Unitree Image', self.checkBoxShowUnitreeImg.isChecked()):
+        if not self.toggleMapvizDisplayVisibility('mapviz_plugins/robot_image', 'Robot Image', self.checkBoxShowUnitreeImg.isChecked()):
             self.checkBoxShowUnitreeImg.blockSignals(True)
             self.checkBoxShowUnitreeImg.setChecked(not self.checkBoxShowUnitreeImg.isChecked())
             self.checkBoxShowUnitreeImg.blockSignals(False)
     
     def showTrajToggledCallback(self):
         if not self.toggleMapvizDisplayVisibility('mapviz_plugins/odometry', 'Wheel Odom', self.checkBoxShowTraj.isChecked()):
-            self.checkBoxShowTraj.setChecked(not self.checkBoxShowTraj.isChecked())
+            self.checkBoxShowTraj.blockSignals(True)
             self.checkBoxShowTraj.setChecked(not self.checkBoxShowTraj.isChecked())
             self.checkBoxShowTraj.blockSignals(False)
 
