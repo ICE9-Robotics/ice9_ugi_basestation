@@ -1,216 +1,217 @@
-capture_directory: ~
-fixed_frame: origin
-target_frame: <none>
-fix_orientation: false
-rotate_90: false
-enable_antialiasing: true
-show_displays: false
-show_actions: true
-show_status_bar: true
-show_capture_tools: true
-window_width: 1853
-window_height: 1025
-view_scale: 1
-offset_x: 0
-offset_y: 0
-background: "#a0a0a4"
+background: '#a0a0a4'
+capture_directory: '~'
 displays:
-  - listName: config
-    type: mapviz_plugins/tile_map
-    name: Sat Map
-    config:
-      visible: true
-      collapsed: true
-      custom_sources:
-        - base_url: http://localhost:8080/wmts/gm_layer/gm_grid/{level}/{x}/{y}.png
-          max_zoom: 19
-          name: Google_Satellite
-          type: wmts
-      bing_api_key: ""
-      source: Bing Maps (terrain)
-  - listName: config
-    type: mapviz_plugins/occupancy_grid
-    name: SLAM Map
-    config:
-      visible: true
-      collapsed: true
-      alpha: 0.5
-      topic: /map
-      update: true
-      scheme: map
-  - listName: config
-    type: mapviz_plugins/grid
-    name: Grid
-    config:
-      visible: false
-      collapsed: true
-      color: "#000000"
-      alpha: 0.2
-      frame: map
-      x: -5
-      y: -50
-      size: 1
-      rows: 100
-      columns: 100
-  - listName: config
-    type: mapviz_plugins/occupancy_grid
-    name: Local costmap
-    config:
-      visible: true
-      collapsed: true
-      alpha: 0.8
-      topic: /slam_planner_node/local_costmap/costmap
-      update: true
-      scheme: costmap
-  - listName: config
-    type: mapviz_plugins/occupancy_grid
-    name: Global costmap
-    config:
-      visible: false
-      collapsed: true
-      alpha: 0.5
-      topic: /slam_planner_node/global_costmap/costmap
-      update: true
-      scheme: costmap
-  - listName: config
-    type: mapviz_plugins/laserscan
-    name: LiDar Points
-    config:
-      visible: true
-      collapsed: true
-      topic: /scan
-      size: 3
-      buffer_size: 1
-      alpha: 1
-      color_transformer: Flat Color
-      min_color: "#ff0000"
-      max_color: "#ff0000"
-      value_min: 0
-      value_max: 100
-      use_rainbow: false
-  - listName: config
-    type: mapviz_plugins/navsat
-    name: Raw GPS Traj
-    config:
-      visible: true
-      collapsed: true
-      topic: /reach/fix
-      color: "#fcaf3e"
-      draw_style: lines
-      use_latest_transforms: false
-      position_tolerance: 0
-      buffer_size: 0
-  - listName: config
-    type: mapviz_plugins/odometry
-    name: GPS Odom
-    config:
-      visible: true
-      collapsed: true
-      topic: /odometry/gps
-      color: "#00ff00"
-      draw_style: lines
-      position_tolerance: 0
-      buffer_size: 0
-      show_laps: false
-      show_covariance: false
-      show_all_covariances: false
-      static_arrow_sizes: false
-      arrow_size: 25
-      use_latest_transforms: false
-      show_timestamps: 0
-  - listName: config
-    type: mapviz_plugins/odometry
-    name: Wheel Odom
-    config:
-      visible: true
-      collapsed: true
-      topic: /odom
-      color: "#ff1900"
-      draw_style: lines
-      position_tolerance: 0
-      buffer_size: 0
-      show_laps: false
-      show_covariance: false
-      show_all_covariances: false
-      static_arrow_sizes: false
-      arrow_size: 25
-      use_latest_transforms: false
-      show_timestamps: 0
-  - listName: config
-    type: mapviz_plugins/path
-    name: Global path
-    config:
-      visible: true
-      collapsed: true
-      topic: /slam_planner_node/DBLocalPlannerROS/global_plan
-      color: "#ff00c1"
-  - listName: config
-    type: mapviz_plugins/path
-    name: Local path
-    config:
-      visible: true
-      collapsed: true
-      topic: /slam_planner_node/DBLocalPlannerROS/local_plan
-      color: "#00ff00"
-  - listName: config
-    type: mapviz_plugins/pose
-    name: Goal
-    config:
-      visible: true
-      collapsed: true
-      topic: /move_base_simple/goal
-      color: "#ff00c1"
-      draw_style: arrows
-      position_tolerance: 0
-      buffer_size: 1
-      show_laps: false
-      static_arrow_sizes: false
-      arrow_size: 25
-      use_latest_transforms: false
-  - listName: config
-    type: mapviz_plugins/tf_frame
-    name: Transformation
-    config:
-      visible: true
-      collapsed: true
-      frame: base_link
-      color: "#ff0000"
-      draw_style: arrows
-      position_tolerance: 1
-      buffer_size: 1
-      static_arrow_sizes: false
-      arrow_size: 25
-      use_latest_transforms: false
-  - listName: config
-    type: mapviz_plugins/robot_image
-    name: Robot Icon
-    config:
-      visible: true
-      collapsed: true
-      frame: base_footprint
-      image: UTGO1PRO.png
-      width: 0.5
-      height: 0.23
-      offset_x: 0
-      offset_y: 0
-      ratio: original
-  - listName: config
-    type: mapviz_plugins/ugi_diagnostics
-    name: Diagnostics info
-    config:
-      visible: true
-      collapsed: true
-      font: Monospace,9,-1,5,50,0,0,0,0,0
-      color: "#2e3436"
-      topic: /unitree/diagnostics
-      anchor: top left
-      units: pixels
-      offset_x: 3
-      offset_y: 2
-  - listName: action
-    type: mapviz_plugins/ugi_basestation
-    name: Control Panel
-    config:
-      visible: true
-      collapsed: false
-      color: "#00ff00"
+- config:
+    bing_api_key: Au3KYijoO2hAkk7ylVnnk9GaPahx2ueDE_qW_zVfC2NHiaNGR5CkO7ftX_KRykU4
+    collapsed: true
+    custom_sources:
+    - base_url: http://localhost:8080/wmts/gm_layer/gm_grid/{level}/{x}/{y}.png
+      max_zoom: 19
+      name: Google_Satellite
+      type: wmts
+    source: Bing Maps (terrain)
+    visible: true
+  listName: config
+  name: Sat Map
+  type: mapviz_plugins/tile_map
+- config:
+    alpha: 0.5
+    collapsed: true
+    scheme: map
+    topic: /map
+    update: true
+    visible: false
+  listName: config
+  name: SLAM Map
+  type: mapviz_plugins/occupancy_grid
+- config:
+    alpha: 0.2
+    collapsed: true
+    color: '#000000'
+    columns: 100
+    frame: map
+    rows: 100
+    size: 1
+    visible: false
+    x: -5
+    y: -50
+  listName: config
+  name: Grid
+  type: mapviz_plugins/grid
+- config:
+    alpha: 0.8
+    collapsed: true
+    scheme: costmap
+    topic: /slam_planner_node/local_costmap/costmap
+    update: true
+    visible: true
+  listName: config
+  name: Local Obstacle
+  type: mapviz_plugins/occupancy_grid
+- config:
+    alpha: 0.5
+    collapsed: true
+    scheme: costmap
+    topic: /slam_planner_node/global_costmap/costmap
+    update: true
+    visible: false
+  listName: config
+  name: Global Obstacle
+  type: mapviz_plugins/occupancy_grid
+- config:
+    alpha: 1
+    buffer_size: 1
+    collapsed: true
+    color_transformer: Flat Color
+    max_color: '#ff0000'
+    min_color: '#ff0000'
+    size: 3
+    topic: /scan
+    use_rainbow: false
+    value_max: 100
+    value_min: 0
+    visible: false
+  listName: config
+  name: LiDar Points
+  type: mapviz_plugins/laserscan
+- config:
+    buffer_size: 0
+    collapsed: true
+    color: '#fcaf3e'
+    draw_style: lines
+    position_tolerance: 0
+    topic: /reach/fix
+    use_latest_transforms: false
+    visible: false
+  listName: config
+  name: Raw GPS Traj
+  type: mapviz_plugins/navsat
+- config:
+    arrow_size: 25
+    buffer_size: 0
+    collapsed: true
+    color: '#00ff00'
+    draw_style: lines
+    position_tolerance: 0
+    show_all_covariances: false
+    show_covariance: false
+    show_laps: false
+    show_timestamps: 0
+    static_arrow_sizes: false
+    topic: /odometry/gps
+    use_latest_transforms: false
+    visible: false
+  listName: config
+  name: GPS Odom
+  type: mapviz_plugins/odometry
+- config:
+    arrow_size: 25
+    buffer_size: 0
+    collapsed: true
+    color: '#ff1900'
+    draw_style: lines
+    position_tolerance: 0
+    show_all_covariances: false
+    show_covariance: false
+    show_laps: false
+    show_timestamps: 0
+    static_arrow_sizes: false
+    topic: /odom
+    use_latest_transforms: false
+    visible: true
+  listName: config
+  name: Wheel Odom
+  type: mapviz_plugins/odometry
+- config:
+    collapsed: true
+    color: '#ff00c1'
+    topic: /slam_planner_node/DBLocalPlannerROS/global_plan
+    visible: true
+  listName: config
+  name: Global path
+  type: mapviz_plugins/path
+- config:
+    collapsed: true
+    color: '#00ff00'
+    topic: /slam_planner_node/DBLocalPlannerROS/local_plan
+    visible: true
+  listName: config
+  name: Local path
+  type: mapviz_plugins/path
+- config:
+    arrow_size: 25
+    buffer_size: 1
+    collapsed: true
+    color: '#ff00c1'
+    draw_style: arrows
+    position_tolerance: 0
+    show_laps: false
+    static_arrow_sizes: false
+    topic: /move_base_simple/goal
+    use_latest_transforms: false
+    visible: false
+  listName: config
+  name: Goal
+  type: mapviz_plugins/pose
+- config:
+    arrow_size: 25
+    buffer_size: 1
+    collapsed: true
+    color: '#ff0000'
+    draw_style: arrows
+    frame: base_link
+    position_tolerance: 1
+    static_arrow_sizes: false
+    use_latest_transforms: false
+    visible: false
+  listName: config
+  name: Transformation
+  type: mapviz_plugins/tf_frame
+- config:
+    collapsed: true
+    frame: base_footprint
+    height: 0.23
+    image: UTGO1PRO.png
+    offset_x: 0
+    offset_y: 0
+    ratio: original
+    visible: true
+    width: 0.5
+  listName: config
+  name: Robot Image
+  type: mapviz_plugins/robot_image
+- config:
+    anchor: top left
+    collapsed: true
+    height: 240
+    keep_ratio: false
+    offset_x: 0
+    offset_y: 0
+    topic: /mjpeg_cam/image/compressed
+    units: pixels
+    visible: false
+    width: 288
+  listName: config
+  name: Robot Camera
+  type: mapviz_plugins/image
+- config:
+    collapsed: false
+    color: '#00ff00'
+    visible: true
+  listName: action
+  name: Control Panel
+  type: mapviz_plugins/ugi_basestation
+enable_antialiasing: true
+fix_orientation: false
+fixed_frame: origin
+offset_x: 0.6208492
+offset_y: -0.2739041
+rotate_90: false
+show_actions: true
+show_capture_tools: true
+show_displays: true
+show_status_bar: true
+target_frame: <none>
+view_scale: 0.007744134
+window_height: 1025
+window_width: 1853
