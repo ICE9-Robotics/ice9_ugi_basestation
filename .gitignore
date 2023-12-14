@@ -14,3 +14,4 @@ basestation_ws/src/CMakeLists.txt
 # generated
 .log
 .log.backup
+*.pyc

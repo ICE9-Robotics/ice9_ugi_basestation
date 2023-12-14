@@ -15,15 +15,5 @@ export ROS_MASTER_URI=http://master:11311
 export ROS_HOSTNAME=${local_hostname}
 source ${BASESTATION_DIR}/basestation_ws/devel/setup.bash
 
-# Wait for ros master
-echo "Waiting for ROS master ..."
-while [[ ! $(rostopic list) ]]; do
-	sleep 1
-    clear
-    echo "Waiting for ROS master ..."
-done
-echo "Got ROS master!"
-
-# Launch
-roslaunch ice9_unitree_basestation basestation.launch
-read -p "Press Enter to continue ..."
+cd ${BASESTATION_DIR}/launcher
+python launcher.py
