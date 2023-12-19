@@ -6,21 +6,18 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Grid1/Status1
         - /Grid1/Offset1
-        - /Odometry1/Shape1
-        - /Map1
+        - /Odometry (wheel)1/Shape1
+        - /Odometry (GPS)1/Shape1
         - /Map1/Status1
-        - /TF1/Frames1
+        - /Aerial map1/Status1
       Splitter Ratio: 0.6526610255241394
-    Tree Height: 484
+    Tree Height: 794
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
     Expanded:
       - /2D Nav Goal1
-      - /2D Pose Estimate1
-      - /Publish Point1
     Name: Tool Properties
     Splitter Ratio: 0.4285709857940674
   - Class: rviz/Views
@@ -32,7 +29,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Laser scan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -44,7 +41,7 @@ Visualization Manager:
       Cell Size: 0.5
       Class: rviz/Grid
       Color: 0; 0; 0
-      Enabled: true
+      Enabled: false
       Line Style:
         Line Width: 0.029999999329447746
         Value: Lines
@@ -57,7 +54,7 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 180
       Reference Frame: odom
-      Value: true
+      Value: false
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
@@ -76,20 +73,20 @@ Visualization Manager:
           Value: true
         Value: true
       Enabled: true
-      Keep: 5
-      Name: Odometry
+      Keep: 100
+      Name: Odometry (wheel)
       Position Tolerance: 0.10000000149011612
       Shape:
         Alpha: 1
         Axes Length: 1
         Axes Radius: 0.10000000149011612
         Color: 255; 25; 0
-        Head Length: 0.30000001192092896
-        Head Radius: 0.10000000149011612
-        Shaft Length: 0.4000000059604645
+        Head Length: 0
+        Head Radius: 0
+        Shaft Length: 0.05000000074505806
         Shaft Radius: 0.05000000074505806
         Value: Arrow
-      Topic: /odom
+      Topic: /odom_fixed
       Unreliable: false
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -110,20 +107,20 @@ Visualization Manager:
           Value: true
         Value: true
       Enabled: true
-      Keep: 5
-      Name: Odom_GPS
+      Keep: 100
+      Name: Odometry (GPS)
       Position Tolerance: 0.10000000149011612
       Shape:
         Alpha: 1
         Axes Length: 1
         Axes Radius: 0.10000000149011612
         Color: 252; 175; 62
-        Head Length: 0.30000001192092896
-        Head Radius: 0.10000000149011612
-        Shaft Length: 1
+        Head Length: 0
+        Head Radius: 0
+        Shaft Length: 0.05000000074505806
         Shaft Radius: 0.05000000074505806
         Value: Arrow
-      Topic: /gps_odom
+      Topic: /odometry/gps
       Unreliable: false
       Value: true
     - Alpha: 0.699999988079071
@@ -146,7 +143,7 @@ Visualization Manager:
       Length: 0.30000001192092896
       Line Style: Lines
       Line Width: 2
-      Name: Local Plan
+      Name: Navigation plan (local)
       Offset:
         X: 0
         Y: 0
@@ -169,7 +166,7 @@ Visualization Manager:
       Length: 0.30000001192092896
       Line Style: Lines
       Line Width: 0.029999999329447746
-      Name: Global Plan
+      Name: Navigation plan (global)
       Offset:
         X: 0
         Y: 0
@@ -198,7 +195,7 @@ Visualization Manager:
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
-      Name: LaserScan
+      Name: Laser scan
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
@@ -218,7 +215,7 @@ Visualization Manager:
       Enabled: true
       Head Length: 0.10000000149011612
       Head Radius: 0.15000000596046448
-      Name: Goal Pose
+      Name: Goal
       Shaft Length: 0.5
       Shaft Radius: 0.029999999329447746
       Shape: Arrow
@@ -230,7 +227,7 @@ Visualization Manager:
       Color Scheme: costmap
       Draw Behind: false
       Enabled: true
-      Name: Inflated Obstacles
+      Name: Obstacles (local)
       Topic: /slam_planner_node/local_costmap/costmap
       Unreliable: false
       Use Timestamp: false
@@ -242,15 +239,54 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        base_footprint:
+          Value: true
+        base_link:
+          Value: false
+        laser:
+          Value: false
+        map:
+          Value: false
+        odom:
+          Value: false
+        origin:
+          Value: true
+        origin__identity:
+          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        origin:
+          map:
+            odom:
+              base_link:
+                laser:
+                  base_footprint:
+                    {}
+          origin__identity:
+            {}
       Update Interval: 0
       Value: true
+    - Alpha: 0.699999988079071
+      Blocks: 3
+      Class: rviz_plugins/AerialMapDisplay
+      Draw Behind: false
+      Enabled: true
+      Map Frame: map
+      Map transform type: NavSatFix Messages and Map Frame
+      Name: Aerial map
+      Object URI: https://tile.openstreetmap.org/{z}/{x}/{y}.png
+      Topic: /reach/fix
+      UTM Frame: utm
+      UTM Zone: -1
+      Value: true
+      XY Reference: <NavSatFix Message>
+      Z Offset: 0
+      Z Reference: <NavSatFix Message>
+      Zoom: 19
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -260,22 +296,13 @@ Visualization Manager:
   Name: root
   Tools:
     - Class: rviz/MoveCamera
-    - Class: rviz/FocusCamera
     - Class: rviz/SetGoal
       Topic: goal
-    - Class: rviz/SetInitialPose
-      Theta std deviation: 0.2617993950843811
-      Topic: initialpose
-      X std deviation: 0.5
-      Y std deviation: 0.5
-    - Class: rviz/PublishPoint
-      Single click: true
-      Topic: /clicked_point
     - Class: rviz/Measure
   Value: true
   Views:
     Current:
-      Angle: -1.5707950592041016
+      Angle: -0.8407962322235107
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -285,19 +312,19 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 23
+      Scale: 110.41741180419922
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 17.84640884399414
-      Y: -5.348729610443115
+      X: 0.027712581679224968
+      Y: 0.04291025921702385
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 713
+  Height: 1023
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd0000000400000000000001560000026ffc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000026f000000c900ffffff000000010000010f000003c2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d000003c2000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000003b70000026f00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000156000003a5fc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000003a5000000c900ffffff000000010000010f000003c2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d000003c2000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000005e1000003a500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -306,6 +333,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 1299
+  Width: 1853
   X: 67
   Y: 27

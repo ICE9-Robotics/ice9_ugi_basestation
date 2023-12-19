@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="swri_transform_util" type="initialize_origin.py" name="initialize_origin">
+    <node pkg="swri_transform_util" type="initialize_origin.py" name="initialize_origin" output="log">
         <param name="local_xy_origin" value="auto" />
         <param name="local_xy_frame" value="origin" />
         <remap from="fix" to="reach/fix" />
@@ -12,7 +12,8 @@
         </rosparam>
     </node>
         
-    <node pkg="mapviz" type="mapviz" name="mapviz">
+    <node pkg="mapviz" type="mapviz" name="mapviz" output="log">
         <param name="config" value="$(find ice9_unitree_basestation)/config/unitree.local.mvc" />
     </node>
+    <!-- <node type="rviz" name="rviz" pkg="rviz" args="-d $(find ice9_unitree_basestation)/config/go1slam.rviz" /> -->
 </launch>
