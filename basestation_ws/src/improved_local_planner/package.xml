@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>improved_local_planner</name>
+  <version>0.8.4</version>
+  <description>
+    The improved_local_planner package implements a plugin
+    to the base_local_planner of the 2D navigation stack.
+  </description>
+
+  <maintainer email="ian@zju.cn"> Zu Dame </maintainer>
+  <license>BSD</license>
+  <author email="ian@zju.cn"> Zu Dame </author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>dynamic_reconfigure</depend>
+
+</package>

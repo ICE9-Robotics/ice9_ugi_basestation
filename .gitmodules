@@ -21,3 +21,6 @@
 [submodule "basestation_ws/src/unitree_ugi_diagnostics"]
 	path = basestation_ws/src/unitree_ugi_diagnostics
 	url = https://github.com/ICE9-Robotics/unitree_ugi_diagnostics.git
+[submodule "basestation_ws/src/mjpeg_cam"]
+	path = basestation_ws/src/mjpeg_cam
+	url = https://github.com/rsmohamad/mjpeg_cam.git
