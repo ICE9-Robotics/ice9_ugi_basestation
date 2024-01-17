@@ -11,14 +11,13 @@ import psutil
 import threading
 from time import sleep
 import ruamel.yaml as yaml
-from speedtest import Speedtest, ConfigRetrievalError
 import rospy
 import rosservice
 
 import launcher_ui
 
 MASTER_HOSTNAME = "master"
-PING_TIMEOUT = 5
+PING_TIMEOUT = 1000
 STATUS_TIMEOUT = 5
 
 def getBasePath():
@@ -82,13 +81,12 @@ def getMasterState():
 
 def pingMaster():
     try:
-        result = subprocess.check_output(['ping', '-6', '-c', '1', '-W', str(PING_TIMEOUT), MASTER_HOSTNAME])
+        result = subprocess.check_output(['fping', '-6', MASTER_HOSTNAME, '-e', '-C', '1', '-t', str(PING_TIMEOUT)])
         result = result.decode('utf-8')
-        start = result.find("time=")
-        end = result.find(" ms", start)
-
-        if "icmp_seq" in result and "time=" in result:
-            return float(result[start + 5:end])
+        start = result.find("(")
+        end = result.find(" avg", start)
+        if "master" in result and "avg" in result:
+            return float(result[start + 1:end])
         else:
             return None
     except subprocess.CalledProcessError as e:
@@ -102,6 +100,8 @@ class RosHandler():
         self.masterPing = None
         self.rosStateEventhandler = rosStateEventhandler
         self.rosOkThreadStopEvent = threading.Event()
+        # self.rosPingThread = threading.Thread(target=self.rosPingThreadCallback)
+        # self.rosPingThread.start()
         self.rosOkThread = threading.Thread(target=self.rosOkThreadCallback)
         self.rosOkThread.start()
 
@@ -131,6 +131,17 @@ class RosHandler():
                 return True, res
         except Exception as e:
             return False, e
+        
+    def rosPingThreadCallback(self):
+        while not self.rosOkThreadStopEvent.is_set():
+            try:
+                self.masterPing = pingMaster()
+                self.rosStateEventhandler("master_ping")
+            except Exception as e:
+                print("Waiting for master: ", e)
+            finally:
+                self.rosStateEventhandler("master_ping")
+            sleep(.1)
     
     def rosOkThreadCallback(self):
         while not self.rosOkThreadStopEvent.is_set():
@@ -139,6 +150,7 @@ class RosHandler():
                 self.rosStateEventhandler("master_ping")
                 if not self.masterPing:
                     self.isRosOk = False
+                    self.rosStateEventhandler("master_state")
                     continue
                 state = getMasterState()
                 if state:
@@ -147,34 +159,10 @@ class RosHandler():
                     self.isRosOk = False
             except Exception as e:
                 self.isRosOk = False
-                print("Error: %s", e)
+                print("Waiting for ROS: ", e)
             finally:
                 self.rosStateEventhandler("master_state")
             sleep(1)
-
-class SpeedtestThread(QtCore.QThread):
-    report_ready = QtCore.pyqtSignal(object)
-
-    def __init__(self, parent=None):
-        QtCore.QThread.__init__(self, parent)
-        self.is_alive = False
-
-    def run(self):
-        self.is_alive = True
-        try:
-            speedtest = Speedtest()
-            speedtest.get_best_server()
-            self.report_ready.emit((1, speedtest.results))
-            speedtest.download()
-            self.report_ready.emit((2, speedtest.results))
-            speedtest.upload()
-            self.report_ready.emit((3, speedtest.results))
-        except ConfigRetrievalError as e:
-            self.report_ready.emit((0, e))
-        except Exception as e:
-            self.report_ready.emit((-1, e))
-        finally:
-            self.is_alive = False
 
 class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -186,10 +174,17 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
         # Variables
         self.mapvizServiceName = ""
         self.rosHandler = RosHandler(self.rosOkEventHandler)
-
+        self.displayToggles = [ 
+                { 'obj': self.checkBoxShowSatMap, 'registered_state': self.checkBoxShowSatMap.isChecked(), 'type': 'mapviz_plugins/tile_map', 'name': 'Sat Map' },
+                { 'obj': self.checkBoxShowSlamMap, 'registered_state': self.checkBoxShowSlamMap.isChecked(), 'type': 'mapviz_plugins/occupancy_grid', 'name': 'SLAM Map' },
+                { 'obj': self.checkBoxShowCam, 'registered_state': self.checkBoxShowCam.isChecked(), 'type': 'mapviz_plugins/image', 'name': 'Robot Camera' },
+                { 'obj': self.checkBoxShowUnitreeImg, 'registered_state': self.checkBoxShowUnitreeImg.isChecked(), 'type': 'mapviz_plugins/robot_image', 'name': 'Robot Image' },
+                { 'obj': self.checkBoxShowTraj, 'registered_state': self.checkBoxShowTraj.isChecked(), 'type': 'mapviz_plugins/odometry', 'name': 'Wheel Odom' },
+                { 'obj': self.checkBoxShowLidarScan, 'registered_state': self.checkBoxShowLidarScan.isChecked(), 'type': 'mapviz_plugins/laserscan', 'name': 'LiDar Points' },
+                { 'obj': self.checkBoxShowObstacle, 'registered_state': self.checkBoxShowObstacle.isChecked(), 'type': 'mapviz_plugins/occupancy_grid', 'name': 'Local Obstacle' }
+            ]
+        
         # Threads
-        self.speedTestThread = None
-        self.remoteSpeedtestReportThread = None
         self.statusClearTimer = None
 
         # Initialise UI elements
@@ -198,7 +193,7 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
 
         self.ping = 0
         self.upload = 0
-        self.download =0
+        self.download = 0
 
     def closeEvent(self, event):
         print("Cleaning up...")
@@ -207,63 +202,32 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
             self.statusClearTimer.cancel()
 
     def connectUIControls(self):
-        self.pushButtonNetSpdBase.clicked.connect(self.netSpdBaseClickedCallback)
-
         self.pushButtonMapvizLaunch.clicked.connect(self.mapvizLaunchClickedCallback)
-        self.pushButtonMapvizSafeQuit.clicked.connect(self.mapvizSafeQuitClickedCallback)
-        self.pushButtonMapvizForceQuit.clicked.connect(self.mapvizForceQuitClickedCallback)
 
-        self.checkBoxShowSatMap.toggled.connect(self.showSatMapToggledCallback)
-        self.checkBoxShowSlamMap.toggled.connect(self.showSlamMapToggledCallback)
-        self.checkBoxShowCam.toggled.connect(self.showCamToggledCallback)
-        self.checkBoxShowUnitreeImg.toggled.connect(self.showUnitreeImgToggledCallback)
-        self.checkBoxShowTraj.toggled.connect(self.showTrajToggledCallback)
-        self.checkBoxShowObstacle.toggled.connect(self.showObstacleToggledCallback)
-        self.pushButtonMapvizSave.clicked.connect(self.saveAsDefaultCallback)
+        self.pushButtonMapvizSave.clicked.connect(self.mapvizSaveCallback)
+        self.pushButtonMapvizApply.clicked.connect(self.mapvizApplyCallback)
 
     def setUIFromConfig(self):
         if not self.mapvizConfig:
             displayErrorBox("Error getting Mapviz config. Config file may not exist.")
             return
         try:
-            setFlag = 0
+            i = 0
             for display in self.mapvizConfig['displays']:
+                for toggle in self.displayToggles:
+                    if display['name'] == toggle['name']:
+                        toggle['obj'].setChecked(display['config']['visible'])
+                        i += 1
+                        break
                 if display['name'] == 'Sat Map':
-                    self.checkBoxShowSatMap.blockSignals(True)
-                    self.checkBoxShowSatMap.setChecked(display['config']['visible'])
-                    self.checkBoxShowSatMap.blockSignals(False)
                     self.lineEditBingAPI.setText(display['config']['bing_api_key'])
-                    setFlag += 1
-                if display['name'] == 'SLAM Map':
-                    self.checkBoxShowSlamMap.blockSignals(True)
-                    self.checkBoxShowSlamMap.setChecked(display['config']['visible'])
-                    self.checkBoxShowSlamMap.blockSignals(False)
-                    setFlag += 1
-                if display['name'] == 'Robot Image':
-                    self.checkBoxShowUnitreeImg.blockSignals(True)
-                    self.checkBoxShowUnitreeImg.setChecked(display['config']['visible'])
-                    self.checkBoxShowUnitreeImg.blockSignals(False)
-                    setFlag += 1
-                if display['name'] == 'Wheel Odom':
-                    self.checkBoxShowTraj.blockSignals(True)
-                    self.checkBoxShowTraj.setChecked(display['config']['visible'])
-                    self.checkBoxShowTraj.blockSignals(False)
-                    setFlag += 1
-                if display['name'] == 'Local Obstacle':
-                    self.checkBoxShowObstacle.blockSignals(True)
-                    self.checkBoxShowObstacle.setChecked(display['config']['visible'])
-                    self.checkBoxShowObstacle.blockSignals(False)
-                    setFlag += 1
-                if display['name'] == 'Robot Camera':
-                    self.checkBoxShowCam.blockSignals(True)
-                    self.checkBoxShowCam.setChecked(display['config']['visible'])
-                    self.checkBoxShowCam.blockSignals(False)
-                    setFlag += 1
+                if i >= len(self.displayToggles):
+                    break
         except Exception as e:
             displayErrorBox("Error getting Mapviz config: %s" % e)
             return
         
-        if setFlag != 6:
+        if i != len(self.displayToggles):
             displayErrorBox("Error getting Mapviz config. Config file may be corrupted. Settings incomplete.")
        
     def toggleMapvizDisplayVisibility(self, type, name, on):
@@ -301,20 +265,23 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
             return False, "Failed: %s" % res[1]
  
     def rosOkEventHandler(self, event):
-        if event == "master_ping":
-            if self.rosHandler.masterPing:
-                self.labelMasterPing.setText("{:.0f} ms".format(self.rosHandler.masterPing))
-            else:
-                self.labelMasterPing.setText("> %d s" % PING_TIMEOUT)
-        elif event == "master_state":
-            if self.rosHandler.isRosOk:
-                self.labelMasterState.setText("OK")
-                self.labelMasterState.setStyleSheet("color: green")
-                self.pushButtonMapvizLaunch.setEnabled(True)
-            else:
-                self.labelMasterState.setText("Unavailable")
-                self.labelMasterState.setStyleSheet("color: red") 
-                self.pushButtonMapvizLaunch.setEnabled(False)  
+        try:
+            if event == "master_ping":
+                if self.rosHandler.masterPing:
+                    self.labelMasterPing.setText("{:.0f} ms".format(self.rosHandler.masterPing))
+                else:
+                    self.labelMasterPing.setText("> %d ms" % PING_TIMEOUT)
+            elif event == "master_state":
+                if self.rosHandler.isRosOk:
+                    self.labelMasterState.setText("OK")
+                    self.labelMasterState.setStyleSheet("color: green")
+                    self.pushButtonMapvizLaunch.setEnabled(True)
+                else:
+                    self.labelMasterState.setText("Unavailable")
+                    self.labelMasterState.setStyleSheet("color: red") 
+                    self.pushButtonMapvizLaunch.setEnabled(False)
+        except Exception as e:
+            print("Error updating UI: ", e)
 
     ################
     ## Status bar ##
@@ -345,37 +312,6 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
     ## UI Callbacks ##
     ##################
 
-    def netSpdBaseClickedCallback(self):
-        if not self.speedTestThread:
-            self.speedTestThread = SpeedtestThread()
-            self.speedTestThread.report_ready.connect(self.baseReportReadyCallback)
-        elif self.speedTestThread.is_alive:
-            self.setStatusBarWarning("Speed test is already running")
-            return
-        self.labelNetSpdBaseLatency.setText("")
-        self.labelNetSpdBaseDown.setText("")
-        self.labelNetSpdBaseUp.setText("")
-        self.labelNetSpdBaseTime.setText("Getting test server...")
-        self.speedTestThread.start()
-
-    def baseReportReadyCallback(self, report):
-        if report[0] == 1:
-            self.labelNetSpdBaseLatency.setText("{:.0f} ms".format(report[1].ping))
-            self.labelNetSpdBaseTime.setText("Testing download speed...")
-        elif report[0] == 2:
-            self.labelNetSpdBaseDown.setText("{:.3f} Mbps".format(report[1].download/1000000))
-            self.labelNetSpdBaseTime.setText("Testing upload speed...")
-        elif report[0] == 3:
-            self.labelNetSpdBaseUp.setText("{:.3f} Mbps".format(report[1].upload/1000000))
-            self.labelNetSpdBaseTime.setText("%s %s" % (report[1].timestamp.split('T')[0], (report[1].timestamp.split('T')[1]).split('.')[0]))
-            self.setStatusBarInfo("Speed test was successful")
-        elif report[0] == 0:
-            self.labelNetSpdBaseTime.setText("Error!")
-            displayErrorBox("No connection to the test server or temporarily blocked because it was run too often: \n%s" % (report[1]))
-        elif report[0] == -1:
-            self.labelNetSpdBaseTime.setText("Error!")
-            displayErrorBox("An unexpected error occured while testing network speed: \n%s" % (report[1]))
-
     def mapvizLaunchClickedCallback(self):
         if not getPid('basestation.desktop.sh'):
             base_path = getBasePath()
@@ -399,78 +335,39 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
         else:
             self.setStatusBarWarning("Mapviz not running")
 
-    def showCamToggledCallback(self):
-        if not self.toggleMapvizDisplayVisibility('mapviz_plugins/image', 'Robot Camera', self.checkBoxShowCam.isChecked()):
-            self.checkBoxShowCam.blockSignals(True)
-            self.checkBoxShowCam.setChecked(not self.checkBoxShowCam.isChecked())
-            self.checkBoxShowCam.blockSignals(False)
-
-    def showSatMapToggledCallback(self):
-        if not self.toggleMapvizDisplayVisibility('mapviz_plugins/tile_map', 'Sat Map', self.checkBoxShowSatMap.isChecked()):
-            self.checkBoxShowSatMap.blockSignals(True)
-            self.checkBoxShowSatMap.setChecked(not self.checkBoxShowSatMap.isChecked())
-            self.checkBoxShowSatMap.blockSignals(False)
-    
-    def showSlamMapToggledCallback(self):
-        if not self.toggleMapvizDisplayVisibility('mapviz_plugins/occupancy_grid', 'SLAM Map', self.checkBoxShowSlamMap.isChecked()):
-            self.checkBoxShowSlamMap.blockSignals(True)
-            self.checkBoxShowSlamMap.setChecked(not self.checkBoxShowSlamMap.isChecked())
-            self.checkBoxShowSlamMap.blockSignals(False)
-
-    def showUnitreeImgToggledCallback(self):
-        if not self.toggleMapvizDisplayVisibility('mapviz_plugins/robot_image', 'Robot Image', self.checkBoxShowUnitreeImg.isChecked()):
-            self.checkBoxShowUnitreeImg.blockSignals(True)
-            self.checkBoxShowUnitreeImg.setChecked(not self.checkBoxShowUnitreeImg.isChecked())
-            self.checkBoxShowUnitreeImg.blockSignals(False)
-    
-    def showTrajToggledCallback(self):
-        if not self.toggleMapvizDisplayVisibility('mapviz_plugins/odometry', 'Wheel Odom', self.checkBoxShowTraj.isChecked()):
-            self.checkBoxShowTraj.blockSignals(True)
-            self.checkBoxShowTraj.setChecked(not self.checkBoxShowTraj.isChecked())
-            self.checkBoxShowTraj.blockSignals(False)
-
-    def showObstacleToggledCallback(self):
-        if not self.toggleMapvizDisplayVisibility('mapviz_plugins/occupancy_grid', 'Local Obstacle', self.checkBoxShowObstacle.isChecked()):
-            self.checkBoxShowObstacle.blockSignals(True)
-            self.checkBoxShowObstacle.setChecked(not self.checkBoxShowObstacle.isChecked())
-            self.checkBoxShowObstacle.blockSignals(False)
-
-    def saveAsDefaultCallback(self):
+    def mapvizSaveCallback(self):
         if not self.mapvizConfig:
             displayErrorBox("Error getting Mapviz config. Config file may not exist.")
             return
         try:
-            setFlag = 0
+            i = 0
             for display in self.mapvizConfig['displays']:
+                for toggle in self.displayToggles:
+                    if display['name'] == toggle['name']:
+                        display['config']['visible'] = toggle['obj'].isChecked()
+                        i += 1
+                        break
+                
                 if display['name'] == 'Sat Map':
-                    display['config']['visible'] = self.checkBoxShowSatMap.isChecked()
                     display['config']['bing_api_key'] = self.lineEditBingAPI.text().encode('utf-8')
-                    setFlag += 1
-                if display['name'] == 'SLAM Map':
-                    display['config']['visible'] = self.checkBoxShowSlamMap.isChecked()
-                    setFlag += 1
-                if display['name'] == 'Robot Image':
-                    display['config']['visible'] = self.checkBoxShowUnitreeImg.isChecked()
-                    setFlag += 1
-                if display['name'] == 'Wheel Odom':
-                    display['config']['visible'] = self.checkBoxShowTraj.isChecked()
-                    setFlag += 1
-                if display['name'] == 'Local Obstacle':
-                    display['config']['visible'] = self.checkBoxShowObstacle.isChecked()
-                    setFlag += 1
-                if display['name'] == 'Robot Camera':
-                    display['config']['visible'] = self.checkBoxShowCam.isChecked()
-                    setFlag += 1
+                if i >= len(self.displayToggles):
+                    break
         except Exception as e:
             displayErrorBox("Aborted. Error getting Mapviz config: %s" % e)
             return
-
-        if setFlag != 6:
+        if i != len(self.displayToggles):
             displayErrorBox("Aborted. Mapviz config file is ill formated.")
             return
         
         saveMapvizConfig(self.mapvizConfig)
         self.setStatusBarInfo("Success")
+
+    def mapvizApplyCallback(self):
+        for toggle in self.displayToggles:
+            if toggle['obj'].isChecked() == toggle['registered_state']:
+                continue
+            if (self.toggleMapvizDisplayVisibility(toggle['type'], toggle['name'], toggle['obj'].isChecked())):
+                toggle['registered_state'] = toggle['obj'].isChecked()
 
 def main():
     app = QApplication(sys.argv)

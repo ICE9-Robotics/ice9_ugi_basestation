@@ -2,7 +2,7 @@ background: '#a0a0a4'
 capture_directory: '~'
 displays:
 - config:
-    bing_api_key: Au3KYijoO2hAkk7ylVnnk9GaPahx2ueDE_qW_zVfC2NHiaNGR5CkO7ftX_KRykU4
+    bing_api_key:
     collapsed: true
     custom_sources:
     - base_url: http://localhost:8080/wmts/gm_layer/gm_grid/{level}/{x}/{y}.png
@@ -209,7 +209,7 @@ offset_y: -0.2739041
 rotate_90: false
 show_actions: true
 show_capture_tools: true
-show_displays: true
+show_displays: false
 show_status_bar: true
 target_frame: <none>
 view_scale: 0.007744134

@@ -16,4 +16,4 @@ export ROS_HOSTNAME=${local_hostname}
 source ${BASESTATION_DIR}/basestation_ws/devel/setup.bash
 
 cd ${BASESTATION_DIR}/launcher
-roslaunch ice9_unitree_basestation basestation.launch
+python launcher.py

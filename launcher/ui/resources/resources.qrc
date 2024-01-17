@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="res">
+    <file>ice9_logo_full.png</file>
     <file>ice9_logo.png</file>
   </qresource>
 </RCC>
