@@ -150,7 +150,6 @@ class RosHandler():
                 self.rosStateEventhandler("master_ping")
                 if not self.masterPing:
                     self.isRosOk = False
-                    self.rosStateEventhandler("master_state")
                     continue
                 state = getMasterState()
                 if state:
@@ -160,8 +159,6 @@ class RosHandler():
             except Exception as e:
                 self.isRosOk = False
                 print("Waiting for ROS: ", e)
-            finally:
-                self.rosStateEventhandler("master_state")
             sleep(1)
 
 class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
@@ -271,15 +268,6 @@ class Launcher(QtWidgets.QMainWindow, launcher_ui.Ui_MainWindow):
                     self.labelMasterPing.setText("{:.0f} ms".format(self.rosHandler.masterPing))
                 else:
                     self.labelMasterPing.setText("> %d ms" % PING_TIMEOUT)
-            elif event == "master_state":
-                if self.rosHandler.isRosOk:
-                    self.labelMasterState.setText("OK")
-                    self.labelMasterState.setStyleSheet("color: green")
-                    self.pushButtonMapvizLaunch.setEnabled(True)
-                else:
-                    self.labelMasterState.setText("Unavailable")
-                    self.labelMasterState.setStyleSheet("color: red") 
-                    self.pushButtonMapvizLaunch.setEnabled(False)
         except Exception as e:
             print("Error updating UI: ", e)
 
