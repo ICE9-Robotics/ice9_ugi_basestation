@@ -443,7 +443,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Show Lidar scan</string>
+            <string>Show Lidar Scan</string>
            </property>
           </widget>
          </item>

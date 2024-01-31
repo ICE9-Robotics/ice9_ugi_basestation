@@ -242,7 +242,7 @@ class Ui_MainWindow(object):
         self.checkBoxShowSatMap.setText(_translate("MainWindow", "Show Satellite Map"))
         self.label_9.setText(_translate("MainWindow", "Bing Map API:"))
         self.checkBoxShowSlamMap.setText(_translate("MainWindow", "Show SLAM Map"))
-        self.checkBoxShowLidarScan.setText(_translate("MainWindow", "Show Lidar scan"))
+        self.checkBoxShowLidarScan.setText(_translate("MainWindow", "Show Lidar Scan"))
         self.pushButtonMapvizSave.setText(_translate("MainWindow", "Save as Defaults"))
         self.pushButtonMapvizApply.setText(_translate("MainWindow", "Apply"))
 
