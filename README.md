@@ -5,8 +5,8 @@
     - [Software package](#software-package)
 - [Installation](#installation)
 - [User instructions](#user-instructions)
-    - [Launcher User Interface](##launcher) 
-    - [Mapviz User Interface](##mapviz)
+    - [Launcher](#launcher) 
+    - [Mapviz](#mapviz)
 - [Troubleshooting](#troubleshooting)
 
 # Overview
@@ -108,13 +108,19 @@ Configuring the robot parameters in real time. The values are not persistent acr
 - **Camera:** adjust camera parameters. Brightness and manual exposure adjustments are not available when auto exposure is checked.
 
 # Troubleshooting
-### Mapviz is unresponsive for a few seconds or longer
+### 1. Mapviz is unresponsive for a few seconds or longer
 This is normally caused by slow network speed on either the robot or the basestation. ROS communication requires at least 24 Mbps or 3 MB/s upload and download speed to run smoothly. 
 
-Solutions:
+**Solutions**
 1. Improve the network speed by moving the robot and/or the basestation to a location with a better network signal.
 2. If network speed does not improve, from the launcher UI, uncheck `Show Camera View`, click `Save as Defaults`, and restart Mapviz. 
 3. If the aboves do not solve the problem, uncheck `Show SLAM Map` as well and save as defaults, then restart Mapviz.
 
-### Lidar scan are not showing on the map, [move_base] server not connected
-Check if the front of the Lidar. If the LED is red, the Lidar is not properly connected. Unplug and replug the USB cable for the Lidar. The LED light should start to blink in yellow. It takes 1 to 2 minutes for the LED to turn red or green. If it is red, repeat the process until it blinks green.
+### 2. Lidar scan are not showing on the map, [move_base] server not connected
+This is normally caused by lidar failing to connect to the robot's PC. If the LED on the front face of the lidar is red, the Lidar is not properly connected. 
+
+**Solution**
+1. Unplug and replug the USB cable for the Lidar.
+2. The LED light should start to blink in yellow.
+3. It takes 1 to 2 minutes for the LED to turn red or green.
+4. If red, repeat the 1-3 until it blinks green.
