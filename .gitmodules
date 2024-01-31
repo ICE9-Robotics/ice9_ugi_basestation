@@ -9,7 +9,7 @@
 [submodule "basestation_ws/src/unitree_ros_to_real"]
 	path = basestation_ws/src/unitree_ros_to_real
 	url = https://github.com/ICE9-Robotics/unitree_ros_to_real.git
-	branch = unitree_go1
+	branch = basestation
 [submodule "basestation_ws/src/joystick_drivers"]
 	path = basestation_ws/src/joystick_drivers
 	url = https://github.com/ros-drivers/joystick_drivers.git
@@ -21,6 +21,7 @@
 [submodule "basestation_ws/src/unitree_ugi_diagnostics"]
 	path = basestation_ws/src/unitree_ugi_diagnostics
 	url = https://github.com/ICE9-Robotics/unitree_ugi_diagnostics.git
+	branch = basestation
 [submodule "basestation_ws/src/mjpeg_cam"]
 	path = basestation_ws/src/mjpeg_cam
 	url = https://github.com/rsmohamad/mjpeg_cam.git
