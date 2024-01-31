@@ -55,39 +55,51 @@ Latency between the basestation PC and the robot, measured up to 1000 ms.
 
 The interface is split into two parts:
 
-> The centre area is for data visualisation, where you can visualise the location of the robot on a satellite map with slam map overlay, lidar scan points, etc. depanding on the configurations.
+The centre area is for data visualisation, where you can visualise the location of the robot on a satellite map with slam map overlay, lidar scan points, etc. depanding on the configurations.
 
-> The Action panel on the right is the interface for interacting with the robot.
+The Action panel on the right is the interface for interacting with the robot.
 
 ### Controls tab
-- **Robot state:**
-    - **Stand Up:** set the robot into the "stand up" position.
-    - **Stand Down:** set the robot into the "stand down" position similar to a crawl pose.
-    - **Recover:** *use with caution!* recover the robot from failed state (e.g. fallen over).
-    - **Idle:** *use with caution!* set the robot into the "idle" state. Use this button only as *the last resort* to stop the robot from doing unexpected motion.
-    - **Soft Stop:** set the robot into the "damping" state. The motors will be relaxed and try to resist against motion. The robot will **collapse** down if its belly is not already touching the ground. This option is normally available only when the robot is in "stand down" position.
-    - **Lock button:** unlcok Soft Stop button in all situations.
-- **Navigation:**
-    - **Set Nav Goal:** draw on the map to set an one-off goal position and pose for the robot to navigate towards.
-    - **Abort Navigation:** abort the "Set Nav Goal" command. Does not stop patrol mode!
-- **Patrol:**
-    - **Waypoint Colour:** change the colour of waypoints.
-    - **Draw Waypoints:** draw or modify waypoints on the map for the robot to navigate through in sequence. Left click to add, hold and drag to move and right click to delete. The first and the last waypoints will automatically connect to form a closed loop.
-    - **Send Waypoints:** send the waypoints to robot.
-    - **Toggle Patrol:** toggle patrol on and off. You must Send Waypoints first!
-    - **Abort and Clear:** abort patrol and clear all waypoints.
-- Diagnostics: (color coding: green = great, yellow = acceptable, red = bad)
-    - **Vel | Cmd Vel:** velocity reported by the robot (quite noisy) | command velocity received by the robot.
-    - **Yaw | Cmd Yaw:** yaw speed reported by the robot (quite noisy) | command yaw speed received by the robot.
-    - **Battery:** percentage of battery capacity.
-    - **GPS Quality:** No fix (bad), fixed/differential (acceptable), RTK fixed/float (great)
-    - **GPS Vel:** velocity reported by GPS (can be used to estimate the quality of the GPS while the robot is stationary).
-    - **Heading:** heading reported by the integrated magnetometer.
-    - **Network status:** shows the quality of the ROS network.
-    - **Robot connectivity:** indicates the responsiveness of the robot base constroller, largely affected by network status.
-    - **GPS connectivity:* shows the GPS delay.
+#### Robot state
+Change the robot stance and state.
+
+- **Stand Up:** set the robot into the "stand up" position.
+- **Stand Down:** set the robot into the "stand down" position similar to a crawl pose.
+- **Recover:** *use with caution!* recover the robot from failed state (e.g. fallen over).
+- **Idle:** *use with caution!* set the robot into the "idle" state. Use this button only as *the last resort* to stop the robot from doing unexpected motion.
+- **Soft Stop:** set the robot into the "damping" state. The motors will be relaxed and try to resist against motion. The robot will **collapse** down if its belly is not already touching the ground. This option is normally available only when the robot is in "stand down" position.
+- **Lock button:** unlcok Soft Stop button in all situations.
+
+#### Navigation
+Issue an one-off navigation command
+
+- **Set Nav Goal:** draw on the map to set an one-off goal position and pose for the robot to navigate towards.
+- **Abort Navigation:** abort the "Set Nav Goal" command. Does not stop patrol mode!
+
+#### Patrol
+Set the robot to navigate through a list of waypoints in sequence.
+
+- **Waypoint Colour:** change the colour of waypoints.
+- **Draw Waypoints:** draw or modify waypoints on the map for the robot to navigate through in sequence. Left click to add, hold and drag to move and right click to delete. The first and the last waypoints will automatically connect to form a closed loop.
+- **Send Waypoints:** send the waypoints to robot.
+- **Toggle Patrol:** toggle patrol on and off. You must Send Waypoints first!
+- **Abort and Clear:** abort patrol and clear all waypoints.
+
+#### Diagnostics:
+Presents some key diagnostic information. Color coding: green = great, yellow = acceptable, red = bad
+- **Vel | Cmd Vel:** velocity reported by the robot (quite noisy) | command velocity received by the robot.
+- **Yaw | Cmd Yaw:** yaw speed reported by the robot (quite noisy) | command yaw speed received by the robot.
+- **Battery:** percentage of battery capacity.
+- **GPS Quality:** No fix (bad), fixed/differential (acceptable), RTK fixed/float (great)
+- **GPS Vel:** velocity reported by GPS (can be used to estimate the quality of the GPS while the robot is stationary).
+- **Heading:** heading reported by the integrated magnetometer.
+- **Network status:** shows the quality of the ROS network.
+- **Robot connectivity:** indicates the responsiveness of the robot base constroller, largely affected by network status.
+- **GPS connectivity:** shows the GPS delay.
 
 ### Settings tab
+Configuring the robot parameters in realtime. The values are not persistent across reboots.
+
 - **Map offset:** correct offset between SLAM map/Lidar scan and satellite map.
 - **Motion:** adjust velocity and acceleration of the robot. This affects navigation and patrol motions only and does not work for joystick controls.
 - **Camera:** adjust camera parameters. Brightness and manual exposure adjustments are not available when auto exposure is checked.
@@ -100,3 +112,6 @@ Solutions:
 1. Improve the network speed by moving the robot and/or the basestation to a location with better network signal.
 2. If network speed does not improve, from the launcher UI, uncheck `Show Camera View`, click `Save as Defaults`, restart Mapviz. 
 3. If the aboves do not solve the problem, uncheck `Show SLAM Map` as well and save as defaults, then restart Mapviz.
+
+### Lidar scan are not showing on the map, [move_base] server not connected
+Check if the front of the Lidar. If the LED is red, it means the Lidar is not properly connected. Unplug and replug in the USB cable for the Lidar. The LED light should start to blink in yellow. It takes 1 to 2 minutes for the LED to turn to either red or green. If it is still red, repeat the process until it blinks green.
