@@ -36,7 +36,7 @@ cd ice9_ugi_basestation/install
 [<img src="doc/launcher_ui.png"/>](doc/launcher_ui.png)
 
 ### Unitree latency
-The latency between the basestation PC and the robot measured up to 1000 ms. Above 1000 ms or no connection can be both displayed as "> 1000 ms".
+It shows the latency between the basestation PC and the robot measured up to 1000 ms. Above 1000 ms latency or no connection can be both displayed as "> 1000 ms".
 
 ### Mapviz panel
 - **Launch:** launch the Mapviz interface.
